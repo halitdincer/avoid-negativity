@@ -1,3 +1,13 @@
 .censor{
-    color:red;
-}
+    color: black ;
+    background: black;
+  }
+  
+  .censor:hover{
+    color: white;
+    background: black;
+  }
+
+  .border{
+    border: 1px solid black;
+  }

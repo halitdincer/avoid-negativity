@@ -1,18 +1,21 @@
 
 var res = $("body *").contents().map(function(){
-    if( this.nodeType == 3 && this.nodeValue.trim() != "")
-        return this.nodeValue.trim().split(".");
+    if( this.nodeType == Node.TEXT_NODE && this.nodeValue.trim() != "" && this.length < 500)
+        return this.nodeValue.trim().split(/\{10}W/); // 
 });
 
+res = Array.from(new Set(res));
+
 var i = 0;
-while(res.length && i < 20) {
-    i = i + 1;
+while(i + 5 < res.length) {
+    
+    
     $.ajax({
         url: 'https://api.cohere.ai/classify',
         type: 'post',
         dataType: "json",
         data: JSON.stringify({
-            "inputs" : Array.from(res.slice(0, 30)).filter(n => n),
+            "inputs" : Array.from(res.slice(i, i+5)).filter(n => n),
             "model" : "cohere-toxicity"
         }),
         headers: {
@@ -21,8 +24,10 @@ while(res.length && i < 20) {
         },
         success: function(data){ 
             data['classifications'].forEach(element => {
+
+                console.log(element['prediction'] + " --- " + element['input']);
+
                 if(element['prediction'] == "TOXIC"){
-                    console.log(element['input']);
                     $("body:contains('"+element['input']+"')").html(function(_, html) {
                         return html.split(element['input']).join("<span class='censor'>" + String(element['input']) +  "</span>");
                     });
@@ -34,4 +39,5 @@ while(res.length && i < 20) {
         console.log(error);
     });
 
+    i = i + 5;
 }
