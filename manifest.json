@@ -1,0 +1,10 @@
+{
+    "manifest_version": 1,
+    "name": "Avoid Negativity",
+    "description": "It is an extension to avoid negativity and hate speech while browsing on the internet",
+    "version": "1.0",
+    "action": {
+      "default_popup": "index.html",
+      "default_icon": "favicon.png"
+    }
+  }

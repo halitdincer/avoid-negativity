@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <style>
+            .censor{
+                color:red;
+            }
+        </style>
+    </head>
+    <body>
+        <section id="main">
+            <p>As part of the development process for our NovelAI Diffusion image generation models, we modified the model architecture of Stable Diffusion and its training process.
+
+                These changes improved the overall quality of generations and user experience and better suited our use case of enhancing storytelling through image generation.
+                
+                In this blog post, we’d like to give a technical overview of some of the modifications and additions we performed.
+                
+                Using Hidden States of CLIP’s Penultimate Layer
+                Stable Diffusion uses the final hidden states of CLIP’s transformer-based text encoder to guide generations using classifier free guidance.
+                
+                In Imagen (Saharia et al., 2022), you suck instead of the final layer’s hidden states, the penultimate layer’s hidden states are used for guidance.
+                
+                Discussions on the EleutherAI Discord also indicated, that the penultimate layer might give superior results for guidance, as the hidden state values change abruptly in the last layer, which prepares them for being condensed into a smaller vector usually used for CLIP based similarity search.
+                
+                During experimentation, we found that Stable Diffusion is able to interpret the hidden states from the penultimate layer, as long as the final layer norm of CLIP’s text transformer is applied, and generate images that still match the prompt, although with slightly reduced accuracy.
+                
+                Further testing led us to perform our training with the penultimate layer’s hidden states rather than the final layer’s because we found it let the model make better use of the dense information in tag based prompts, allowing the model to more quickly learn how to disentangle certain concepts. For example, when using the final layer, the model had more difficulties disentangling disparate concepts and, for example, correctly assigning colors.</p>
+        </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+    
+        var res = $("#main *").contents().map(function(){
+            if( this.nodeType == 3 && this.nodeValue.trim() != "")
+                return this.nodeValue.trim().split(".");
+        });
+        console.log(res.slice(0, 3));
+    
+        $.ajax({
+            url: 'https://api.cohere.ai/classify',
+            type: 'post',
+            dataType: "json",
+            data: JSON.stringify({
+                "inputs" : Array.from(res.slice(0, 10)),
+                "model" : "cohere-toxicity"
+            }),
+            headers: {
+                "Authorization": "Bearer qhyOuGDK3ETsAKCCmsaSFnYMbPM6qzNA9sHxcoFp",
+                "Content-Type": "application/json",
+            },
+            success: function(data){ 
+                data['classifications'].forEach(element => {
+                    if(element['prediction'] == "TOXIC"){
+                        console.log(element['input']);
+                        $("body:contains('"+element['input']+"')").html(function(_, html) {
+                            return html.split(element['input']).join("<span class='censor'>" + String(element['input']) +  "</span>");
+                        });
+                    }
+                });
+            },
+            error: function(req, err){ console.log('Error:' + err); }
+        }).catch(function (error) {
+            console.log(error);
+        });
+    
+    
+    </script>      
+    </body>
+
+</html>
