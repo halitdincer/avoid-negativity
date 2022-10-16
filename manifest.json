@@ -1,19 +1,22 @@
 {
     "manifest_version": 3,
-    "name": "Avoid Negativity",
+    "name": "Negate",
     "description": "It is an extension to avoid negativity and hate speech while browsing on the internet",
     "version": "1.0",
     "action": {
       "default_popup": "index.html",
-      "default_icon": "favicon.png"
+      "default_icon": "favicon.ico"
     },
-
+    "permissions": [
+      "storage",
+      "activeTab"
+    ],
     "host_permissions": [
     	"https://api.cohere.ai/*"
   	],
-    // "content_security_policy": {
-    //   "extension_pages": "script-src 'self' https://api.cohere.ai/classify; object-src 'self'"
-    // },
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    },
     // "content_security_policy": "script-src 'self' https://api.cohere.ai/classify; object-src 'self'",
     "content_scripts": [
       {
