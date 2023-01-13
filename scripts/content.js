@@ -1,66 +1,54 @@
 
 chrome.storage.sync.get(['enable'], function(result) {
+
+
     if(result.enable == true){
 
         // Create a list of every sentences in the body 
-        var res = $("body *").contents().map(function(){
+        var word_blocks = $("body *").contents().map(function(){
             // if node is a text node and it is not empty and length is less than 500
             if( this.nodeType == Node.TEXT_NODE && this.nodeValue.trim() != "" && this.length < 500)
                 return this.nodeValue.trim().split(/[."-]/) ; // .split(/((\S+ ){4}\S+)|(\S+( \S+)*)(?= *\n|$)|\S+/g)
         });
 
         // Remove duplicates sentences
-        res = Array.from(new Set(res));
+        word_blocks = Array.from(new Set(word_blocks));
 
-        // iterate through at sentences list in batches of 30
-        var i = 0;
-        while(i + 30 < res.length) {
-            
-            // TEST: console.log(res.slice(i, i+30));
-            
-            // maka ajax request with 30 sentences batch
-            $.ajax({
-                url: 'https://api.cohere.ai/classify',
-                type: 'post',
-                dataType: "json",
-                data: JSON.stringify({
-                    "inputs" : res.slice(i, i+30).filter(n => n),
-                    "model" : "cohere-toxicity"
-                }),
-                headers: {
-                    "Authorization": "Bearer ngIhFHVVAWXneht7YJcsRbIWksmP7ejkhKu2woeA",
-                    "Content-Type": "application/json",
-                },
-                success: function(data){ 
+        // The minimum prediction confidence.
+        const threshold = 0.9;
+        
+        // Load the model
+        toxicity.load(threshold).then(model => {
 
-                    // iterate through every sentences in the result json
-                    data['classifications'].forEach(element => {
+          // Use toxicity model to classify each word block in word_blocks
+          model.classify(word_blocks).then(predictions => {
 
-                        // log the prediction and sentences
-                        console.log(element['prediction'] + " --- " + element['input']);
+            predictions[6]['results'].forEach(function callback(element, index) {
 
-                        // if the prediction is toxic
-                        if(element['prediction'] == "TOXIC"){
+                  // if the prediction is toxic
+                  if(element['match']){
 
-                            // find the sentences and wrap around with censor class
-                            $("body:contains('"+element['input']+"')").html(function(_, html) {
-                                return html.split(element['input']).join("<span class='censor'>" + element['input'] +  "</span>");
-                            });
-                        }
+                    // find the sentences and wrap around with censor class
+                    $("body:contains('"+res[index]+"')").html(function(_, html) {
+                        return html.split(res[index]).join("<span class='censor'>" + res[index] +  "</span>");
                     });
-                },
-                error: function(req, err){ console.log('Error:' + err); }
-            }).catch(function (error) {
-                console.log(error);
-            });
 
-            i = i + 30;
-        }
+                  }
+              });
+
+          }).catch(function (error) {
+              console.log(error);
+          });
+
+        });
 
 
-    }
-});
+    } // End of "if(result.enable == true)"
 
+}); // End of "chrome.storage.sync.get"
+
+
+// Remove the censor span with double click on the word block.
 $('span').dblclick(function(event) {
     $(this).toggleClass('censor');
 });

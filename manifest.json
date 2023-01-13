@@ -1,5 +1,5 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "name": "Negate",
     "description": "It is an extension to avoid negativity and hate speech while browsing on the internet",
     "version": "1.0",
@@ -20,18 +20,12 @@
       "storage",
       "activeTab"
     ],
-    "host_permissions": [
-    	"https://api.cohere.ai/*"
-  	],
-    "content_security_policy": {
-      "extension_pages": "script-src 'self'; object-src 'self'"
-    },
-    // "content_security_policy": "script-src 'self' https://api.cohere.ai/classify; object-src 'self'",
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "content_scripts": [
       {
         "matches": ["<all_urls>"],
         "css": ["styles/content.css"],
-        "js": ["scripts/jquery.js","scripts/content.js"]
+        "js": ["scripts/tensorflow.js","scripts/tensorflow-toxicity.js","scripts/jquery.js","scripts/content.js"]
       }
     ]
   }
