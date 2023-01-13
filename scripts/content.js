@@ -14,8 +14,10 @@ chrome.storage.sync.get(['enable'], function(result) {
         // Remove duplicates sentences
         word_blocks = Array.from(new Set(word_blocks));
 
+        console.log(word_blocks);
+
         // The minimum prediction confidence.
-        const threshold = 0.9;
+        const threshold = 0.7;
         
         // Load the model
         toxicity.load(threshold).then(model => {
@@ -36,8 +38,6 @@ chrome.storage.sync.get(['enable'], function(result) {
                   }
               });
 
-          }).catch(function (error) {
-              console.log(error);
           });
 
         });
