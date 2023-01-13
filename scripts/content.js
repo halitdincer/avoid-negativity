@@ -14,6 +14,11 @@ chrome.storage.sync.get(['enable'], function(result) {
         // Remove duplicates sentences
         word_blocks = Array.from(new Set(word_blocks));
 
+        // Remove word_block less than 4 letters
+        word_blocks = word_blocks.filter(function(word_block) { 
+            return word_block.length > 4;
+        });
+
         console.log(word_blocks);
 
         // The minimum prediction confidence.
@@ -31,8 +36,8 @@ chrome.storage.sync.get(['enable'], function(result) {
                   if(element['match']){
 
                     // find the sentences and wrap around with censor class
-                    $("body:contains('"+res[index]+"')").html(function(_, html) {
-                        return html.split(res[index]).join("<span class='censor'>" + res[index] +  "</span>");
+                    $("body:contains('"+word_blocks[index]+"')").html(function(_, html) {
+                        return html.split(word_blocks[index]).join("<span class='censor'>" + word_blocks[index] +  "</span>");
                     });
 
                   }
